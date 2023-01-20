@@ -1,22 +1,15 @@
-import { createEpicMiddleware } from "redux-observable";
-import {
-  applyMiddleware,
-  legacy_createStore as createStore,
-  compose,
-} from "redux";
-import { rootEpic, rootReducer } from "./root";
+import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from '@reduxjs/toolkit/query'
+import { placesApi } from "../services/places";
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = configureStore({
+  reducer: {
+    [placesApi.reducerPath]: placesApi.reducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(placesApi.middleware),
+});
 
-const epicMiddleware = createEpicMiddleware();
+setupListeners(store.dispatch)
 
-export default function configureStore() {
-  const store = createStore(
-    rootReducer,
-    composeEnhancers(applyMiddleware(epicMiddleware))
-  );
-
-  epicMiddleware.run(rootEpic);
-
-  return store;
-}
+export default store;

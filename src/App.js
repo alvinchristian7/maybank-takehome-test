@@ -1,42 +1,51 @@
 import { Card, AutoComplete } from "antd";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { connect } from "react-redux";
 import "./App.css";
-import { fetchPlace } from "./store/requestPlace";
+import { useLazyGetPlacesQuery } from "./services/places";
 
-function App({ places, fetchPlace }) {
-  const [value, setValue] = useState('');
-  const [options, setOptions] = useState([]);
+function App(props) {
+  const [value, setValue] = useState("");
+  const [trigger, { data, error, isLoading }] = useLazyGetPlacesQuery();
+  const options = useMemo(
+    () =>
+      data &&
+      data.features.map(({ properties }) => ({
+        value: properties.address_line1,
+        label: (
+          <div>
+            <strong>{properties.address_line1}</strong>
+            <div>{properties.address_line2}</div>
+          </div>
+        ),
+      })),
+    [data]
+  );
 
-  const onSearch = (searchText) => {
-    // setOptions(
-    //   !searchText ? [] : [mockVal(searchText), mockVal(searchText, 2), mockVal(searchText, 3)],
-    // );
-  };
-  const onSelect = (data) => {
-    console.log('onSelect', data);
+  const onSelect = (val) => {
+    console.log("onSelect", val);
   };
 
-  const onChange = (data) => {
-    setValue(data);
+  const onChange = (val) => {
+    setValue(val);
   };
-console.log(places)
+
   return (
     <div className="App greyBg">
       <Card
         className="mainContent"
-        title="Google Place Autocomplete"
+        title="Commercials around Gambir"
         bordered={false}
-        style={{
-          width: 500,
-        }}
+        // style={{
+        //   width: 500,
+        // }}
       >
         <AutoComplete
           value={value}
           options={options}
-          style={{ width: 200 }}
+          style={{ width: 600 }}
           onSelect={onSelect}
-          onSearch={fetchPlace}
+          onSearch={trigger}
           onChange={onChange}
           placeholder="Input your place"
         />
@@ -45,4 +54,4 @@ console.log(places)
   );
 }
 
-export default connect(state => state, { fetchPlace })(App);
+export default App;
