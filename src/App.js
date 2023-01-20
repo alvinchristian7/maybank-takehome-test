@@ -9,7 +9,7 @@ function App(props) {
   const [trigger, { data, error, isFetching }] = useLazyGetPlacesQuery();
   const options = useMemo(
     () =>
-      data &&
+    (value && !error) ? (data &&
       data.features.map(({ properties }) => ({
         value: properties.address_line1,
         label: (
@@ -18,8 +18,9 @@ function App(props) {
             <div>{properties.address_line2}</div>
           </div>
         ),
-      })),
-    [data]
+      }))
+      ) : [],
+    [data, value, error]
   );
 
   const onSelect = (val) => {
@@ -29,7 +30,7 @@ function App(props) {
   const onChange = (val) => {
     setValue(val);
   };
-console.log(isFetching)
+
   return (
     <div className="App greyBg">
       <Card
@@ -45,11 +46,13 @@ console.log(isFetching)
           options={options}
           style={{ width: 600 }}
           onSelect={onSelect}
-          onSearch={trigger}
+          onSearch={(val) => val && trigger(val)}
           onChange={onChange}
           placeholder="Input your place"
           notFoundContent={isFetching ? <Spin/> : (
-            error ? JSON.stringify(error, null, 2) : "Data not found"
+            error ? JSON.stringify(error, null, 2) : (
+              value ? "Data not found" : "Please input your search text"
+              )
           )}
         />
       </Card>
