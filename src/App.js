@@ -1,4 +1,4 @@
-import { Card, AutoComplete } from "antd";
+import { Card, AutoComplete, Spin } from "antd";
 import { useMemo, useState } from "react";
 import { connect } from "react-redux";
 import "./App.css";
@@ -6,7 +6,7 @@ import { useLazyGetPlacesQuery } from "./services/places";
 
 function App(props) {
   const [value, setValue] = useState("");
-  const [trigger, { data, error, isLoading }] = useLazyGetPlacesQuery();
+  const [trigger, { data, error, isFetching }] = useLazyGetPlacesQuery();
   const options = useMemo(
     () =>
       data &&
@@ -29,7 +29,7 @@ function App(props) {
   const onChange = (val) => {
     setValue(val);
   };
-
+console.log(isFetching)
   return (
     <div className="App greyBg">
       <Card
@@ -48,6 +48,9 @@ function App(props) {
           onSearch={trigger}
           onChange={onChange}
           placeholder="Input your place"
+          notFoundContent={isFetching ? <Spin/> : (
+            error ? JSON.stringify(error, null, 2) : "Data not found"
+          )}
         />
       </Card>
     </div>
